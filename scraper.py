@@ -15,9 +15,18 @@ import os
 import codecs
 from sklearn import feature_extraction
 import mpld3
+import string
+from nltk.tag import pos_tag
+from gensim import corpora, models, similarities
+import json
 
 
-def scrape(keyword: str, num_pages: int) -> object:
+
+
+
+
+
+def scrape(keyword: str, search_engine : str, num_pages: int) -> object:
     scrape_results = []
     titles = []
     links = []
@@ -26,7 +35,7 @@ def scrape(keyword: str, num_pages: int) -> object:
     config = {
         'use_own_ip': True,
         'keyword': keyword,
-        'search_engines': ['bing'],
+        'search_engines': [search_engine],
         'num_pages_for_keyword': num_pages,
         'scrape_method': 'selenium',
         'sel_browser': 'chrome',
@@ -52,7 +61,7 @@ def scrape(keyword: str, num_pages: int) -> object:
     return scrape_results
 
 
-def stemstoptok(scrape_results, query):
+def kmeans(scrape_results, query):
     titles = scrape_results[0]
     links = scrape_results[1]
     snippets = scrape_results[2]
@@ -69,7 +78,7 @@ def stemstoptok(scrape_results, query):
         ranks.append(i)
 
     # load nltk's English stopwords as variable called 'stopwords'
-    # nltk.download('stopwords')
+    #nltk.download('stopwords')
     stopwords = nltk.corpus.stopwords.words('dutch')
 
     # load nltk's Snowball stemmer
@@ -77,7 +86,7 @@ def stemstoptok(scrape_results, query):
 
     def tokenize_and_stem(text):
         # first tokenize by sentence, then by word to ensure that punctuation is caught as it's own token
-        # nltk.download('punkt')
+        #nltk.download('punkt')
         tokens = [word.lower() for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent)]
         filtered_tokens = []
         # filter out any tokens not containing letters (e.g., numeric tokens, raw punctuation)
@@ -146,8 +155,85 @@ def stemstoptok(scrape_results, query):
         print()
 
 
+def lda_topicmodeling(snippets, query):
+
+    # load nltk's English stopwords as variable called 'stopwords'
+    # nltk.download('stopwords')
+    stopwords = nltk.corpus.stopwords.words(['dutch','english'])
+
+    # load nltk's Snowball stemmer
+    stemmer = SnowballStemmer("dutch")
+
+    def tokenize_and_stem(text):
+        # first tokenize by sentence, then by word to ensure that punctuation is caught as it's own token
+        #nltk.download('punkt')
+        tokens = [word.lower() for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent)]
+        filtered_tokens = []
+        # filter out any tokens not containing letters (e.g., numeric tokens, raw punctuation)
+        for token in tokens:
+            if re.search('[a-zA-Z]', token) and token not in stopwords and token is not query:
+                filtered_tokens.append(token)
+        stems = [stemmer.stem(t) for t in filtered_tokens]
+        return stems
+
+
+    def strip_proppers(text):
+        # first tokenize by sentence, then by word to ensure that punctuation is caught as it's own token
+        tokens = [word for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent) if word.islower()]
+        return "".join(
+            [" " + i if not i.startswith("'") and i not in string.punctuation else i for i in tokens]).strip()
+
+
+    def strip_proppers_POS(text):
+        tagged = pos_tag(text.split())  # use NLTK's part of speech tagger
+        non_propernouns = [word for word, pos in tagged if pos != 'NNP' and pos != 'NNPS']
+        return non_propernouns
+
+    # remove proper names
+    preprocess = [strip_proppers(doc) for doc in snippets]
+
+    # tokenize
+    tokenized_text = [tokenize_and_stem(text) for text in preprocess]
+
+    # remove stop words
+    texts = [[word for word in text if word not in stopwords] for text in tokenized_text]
+
+    # create a Gensim dictionary from the texts
+    dictionary = corpora.Dictionary(texts)
+
+    # remove extremes (similar to the min/max df step used when creating the tf-idf matrix)
+    dictionary.filter_extremes(no_below=1, no_above=0.8)
+
+    # convert the dictionary to a bag of words corpus for reference
+    corpus = [dictionary.doc2bow(text) for text in texts]
+
+    lda = models.LdaModel(corpus, num_topics=5,
+                          id2word=dictionary,
+                          update_every=5,
+                          chunksize=10000,
+                          passes=100)
+
+    print(lda.show_topics())
+
+
+    #topic_words = topics_matrix[:, :, 1]
+    #for i in topic_words:
+    #    print([str(word) for word in i])
+    #    print()
+
+
 if __name__ == '__main__':
-    results = scrape('jaguar', 50)
-    stemstoptok(results, 'jaguar')
+    #qe.main(0.9,'jaguar')
+
+    results1 = np.array(scrape('jaguar car', 'google', 10))
+    results2 = np.array(scrape('jaguar cat', 'google', 10))
+    results3 = np.array(scrape('jaguar console', 'google', 10))
+    results4 = np.array(scrape('jaguar film', 'google', 10))
+
+    results = np.c_[results1, results2, results3, results4];
+    kmeans(results, 'jaguar')
+    #lda_topicmodeling(results[2], 'jaguar')
+
+    json.dump(results.tolist(), codecs.open('jaguar.txt', 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4)
 
 
