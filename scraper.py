@@ -16,8 +16,8 @@ def scrape(keywords, search_engine : str, num_pages: int) -> object:
         'num_pages_for_keyword': num_pages,
         'scrape_method': 'http',
         'sel_browser': 'chrome',
-        'do_caching': True,
-        'num_workers': 10
+        'do_caching': False,
+        'num_workers': 1
     }
     search = GoogleScraper.scrape_with_config(config)
 
