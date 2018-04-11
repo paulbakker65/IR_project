@@ -81,6 +81,8 @@ var begin = Date.now()
 
 var mode_array = [true,true,true,true,false,false,false,false]
 
+var not_saved = true;
+
 var log = [ 
 		{task:"", cat:false, found:false, time:0, clicks:0},
 		{task:"", cat:false, found:false, time:0, clicks:0},
@@ -330,6 +332,7 @@ function log_timeEnd() {
 };
 
 function found_it() {
+	not_saved = false;
 	console.log("Found")
 	log_timeEnd()
 	
@@ -345,6 +348,7 @@ function found_it() {
 }
 
 function give_up() {
+	not_saved = false;
 	console.log("Gave up")
 	if(mode_array[currentsubject["num"]]) {
 		console.log(currentsubject["name"].concat(" categorized"))
@@ -376,6 +380,11 @@ function save() {
 $(document).on('click', '.subj_nav', function(e){
 	// console.log(e)
 	// console.log($(this))
+	if(not_saved) {
+		alert("Please provide if you have found the information or give up on this particular task");
+		return
+	}
+	
 	if ($(this)["0"].id == 'currentpage') {
 		begin = Date.now();
 		log_time();
@@ -385,6 +394,7 @@ $(document).on('click', '.subj_nav', function(e){
 	begin = Date.now()
 	log_time();
 	switch_data(mode_array[currentsubject["num"]], currentsubject);
+	not_saved = true;
 });
 
 $(document).on('click', '.entry', function(e){
