@@ -27,7 +27,42 @@ var hertz = {
 	num:2
 };
 
-var subjectlist = {Jaguar:jaguar, Shell:shell, Hertz:hertz};
+var apple = {
+		name:"Apple",
+		task:"Where is...",
+		datalink:"./apple.json",
+		num:3
+	};
+
+var fish = {
+		name:"Fish",
+		task:"Where is...",
+		datalink:"./fish.json",
+		num:4
+	};
+
+var mouse = {
+		name:"Mouse",
+		task:"Where is...",
+		datalink:"./mouse.json",
+		num:5
+	};
+
+var bear = {
+		name:"Bear",
+		task:"Where is...",
+		datalink:"./bear.json",
+		num:6
+	};
+
+var duck = {
+		name:"Duck",
+		task:"Where is...",
+		datalink:"./duck.json",
+		num:7
+	};
+
+var subjectlist = {Jaguar:jaguar, Shell:shell, Hertz:hertz, Apple:apple, Fish:fish, Mouse:mouse, Bear:bear, Duck:duck};
 
 
 // CONFIG
@@ -39,6 +74,8 @@ var currentsubject = jaguar;
 var currentpage = 1;
 
 var n_pages = 0;
+
+var clicks = 0;
 
 var mode_array = [true,true,true,true,false,false,false,false]
 
@@ -273,11 +310,14 @@ function log_timeEnd() {
 	else {
 		console.timeEnd(currentsubject["name"].concat(" uncategorized"));
 	};
+	console.log("Number of clicks: " + clicks)
+	clicks = 0;
+	
 };
 
 mode_array = shuffle(mode_array);
-console.log(mode_array);
 switch_data(mode_array[currentsubject["num"]], currentsubject);
+log_time();
 
 ////////////
 // EVENTS //
@@ -297,6 +337,7 @@ $(document).on('click', '.subj_nav', function(e){
 });
 
 $(document).on('click', '.entry', function(e){
+	clicks++; 
 	window.open($(this)["0"].attributes.href.value)
 });
 
