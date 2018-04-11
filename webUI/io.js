@@ -9,19 +9,22 @@
 var jaguar = {
 	name:"Jaguar",
 	task:"Find a retailer for...",
-	datalink:"./jaguar.json"
+	datalink:"./jaguar.json",
+	num:0
 };
 
 var shell = {
 	name:"Shell",
 	task:"What type of...",
-	datalink:"./shell.json"
+	datalink:"./shell.json",
+	num:1
 };
 
 var hertz = {
 	name:"Hertz",
 	task:"Where is...",
-	datalink:"./hertz.json"
+	datalink:"./hertz.json",
+	num:2
 };
 
 var subjectlist = {Jaguar:jaguar, Shell:shell, Hertz:hertz};
@@ -31,17 +34,13 @@ var subjectlist = {Jaguar:jaguar, Shell:shell, Hertz:hertz};
 
 var n_items_pp = 20;
 
-var categorised = true;
-
 var currentsubject = jaguar;
 
 var currentpage = 1;
 
 var n_pages = 0;
 
-var mode = true; // true == categorised
-
-
+var mode_array = [true,true,true,true,false,false,false,false]
 
 ///////////
 // NAVs ///
@@ -225,7 +224,24 @@ function load_data_categorised(page, subject, catdata){
 // MAIN //
 //////////
 
+function shuffle(array) {
+	  var currentIndex = array.length, temporaryValue, randomIndex;
 
+	  // While there remain elements to shuffle...
+	  while (0 !== currentIndex) {
+
+	    // Pick a remaining element...
+	    randomIndex = Math.floor(Math.random() * currentIndex);
+	    currentIndex -= 1;
+
+	    // And swap it with the current element.
+	    temporaryValue = array[currentIndex];
+	    array[currentIndex] = array[randomIndex];
+	    array[randomIndex] = temporaryValue;
+	  }
+
+	  return array;
+	}
 
 function get_data(mode, subject, page) {
 	if (mode == true) {
@@ -241,9 +257,27 @@ function switch_data(mode, subject) {
 	setTimeout(function(){get_data(mode, subject, currentpage);}, 3000);
 }
 
-switch_data(mode, currentsubject);
+function log_time() {
+	if(mode_array[currentsubject["num"]]) {
+		console.time(currentsubject["name"].concat(" categorized"))
+	}
+	else {
+		console.time(currentsubject["name"].concat(" uncategorized"))
+	};
+};
 
+function log_timeEnd() {
+	if(mode_array[currentsubject["num"]]) {
+		console.timeEnd(currentsubject["name"].concat(" categorized"));
+	}
+	else {
+		console.timeEnd(currentsubject["name"].concat(" uncategorized"));
+	};
+};
 
+mode_array = shuffle(mode_array);
+console.log(mode_array);
+switch_data(mode_array[currentsubject["num"]], currentsubject);
 
 ////////////
 // EVENTS //
@@ -253,10 +287,13 @@ $(document).on('click', '.subj_nav', function(e){
 	// console.log(e)
 	// console.log($(this))
 	if ($(this)["0"].id == 'currentpage') {
+		log_time();
 		return
 	};
-	currentsubject = subjectlist[$(this)["0"].id]
-	switch_data(mode, currentsubject);
+	log_timeEnd();
+	currentsubject = subjectlist[$(this)["0"].id];
+	log_time();
+	switch_data(mode_array[currentsubject["num"]], currentsubject);
 });
 
 $(document).on('click', '.entry', function(e){
@@ -296,6 +333,6 @@ $(document).on('click', '.pagenav', function(e){
 	if ($(this)["0"].id.length < 3) {
 		currentpage = Number($(this)["0"].id);
 	};	
-	get_data(mode, currentsubject, currentpage);
+	get_data(mode_array[currentsubject["num"]], currentsubject, currentpage);
 });
 
