@@ -77,7 +77,21 @@ var n_pages = 0;
 
 var clicks = 0;
 
+var begin = Date.now()
+
 var mode_array = [true,true,true,true,false,false,false,false]
+
+var log = [ 
+		{task:"", cat:false, found:false, time:0, clicks:0},
+		{task:"", cat:false, found:false, time:0, clicks:0},
+		{task:"", cat:false, found:false, time:0, clicks:0},
+		{task:"", cat:false, found:false, time:0, clicks:0},
+		{task:"", cat:false, found:false, time:0, clicks:0},
+		{task:"", cat:false, found:false, time:0, clicks:0},
+		{task:"", cat:false, found:false, time:0, clicks:0},
+		{task:"", cat:false, found:false, time:0, clicks:0}
+		];
+
 
 ///////////
 // NAVs ///
@@ -311,13 +325,23 @@ function log_timeEnd() {
 		console.timeEnd(currentsubject["name"].concat(" uncategorized"));
 	};
 	console.log("Number of clicks: " + clicks)
-	clicks = 0;
+	
 	
 };
 
 function found_it() {
 	console.log("Found")
 	log_timeEnd()
+	
+	var end = Date.now()
+	
+	log[currentsubject["num"]].task = currentsubject.name;
+	log[currentsubject["num"]].cat = mode_array[currentsubject["num"]];
+	log[currentsubject["num"]].found = true;
+	log[currentsubject["num"]].time = (end-begin)/1000;
+	log[currentsubject["num"]].clicks = clicks;
+	
+	clicks = 0;
 }
 
 function give_up() {
@@ -328,11 +352,22 @@ function give_up() {
 	else {
 		console.log(currentsubject["name"].concat(" uncategorized"))
 	};
+	
+	log[currentsubject["num"]].task = currentsubject.name;
+	log[currentsubject["num"]].cat = mode_array[currentsubject["num"]];
+	log[currentsubject["num"]].found = false;
+	log[currentsubject["num"]].time = -1;
+	log[currentsubject["num"]].clicks = clicks;
 }
 
 mode_array = shuffle(mode_array);
 switch_data(mode_array[currentsubject["num"]], currentsubject);
+begin = Date.now();
 log_time();
+
+function save() {
+	console.log(log)
+}
 
 ////////////
 // EVENTS //
@@ -342,10 +377,12 @@ $(document).on('click', '.subj_nav', function(e){
 	// console.log(e)
 	// console.log($(this))
 	if ($(this)["0"].id == 'currentpage') {
+		begin = Date.now();
 		log_time();
 		return
 	};
 	currentsubject = subjectlist[$(this)["0"].id];
+	begin = Date.now()
 	log_time();
 	switch_data(mode_array[currentsubject["num"]], currentsubject);
 });
