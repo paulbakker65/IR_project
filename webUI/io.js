@@ -83,6 +83,8 @@ var mode_array = [true,true,true,true,false,false,false,false]
 
 var not_saved = true;
 
+var log_saved = false;
+
 var log = [ 
 		{task:"", cat:false, found:false, time:0, clicks:0},
 		{task:"", cat:false, found:false, time:0, clicks:0},
@@ -98,8 +100,6 @@ var log = [
 ///////////
 // NAVs ///
 ///////////
-
-
 
 function subject_navigation(subject){
 	// create subject navigation
@@ -370,12 +370,22 @@ begin = Date.now();
 log_time();
 
 function save() {
+	log_saved = true;
 	console.log(log)
 }
 
 ////////////
 // EVENTS //
 ////////////
+
+$(window).on("beforeunload", function() { 
+	if(!log_saved) {
+    	return confirm("Did you save after completing all the search tasks? If not please do"); 
+	}
+	else {
+		return
+	}
+});
 
 $(document).on('click', '.subj_nav', function(e){
 	// console.log(e)
