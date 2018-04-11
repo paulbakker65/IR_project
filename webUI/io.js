@@ -226,8 +226,8 @@ function load_data_categorised(page, subject, catdata){
 			max_i = (catdata[key].length)-1;
 		};
 	};
-	console.log(catdata)
-	console.log(n_pages);
+	//console.log(catdata)
+	//console.log(n_pages);
 	for (var key in catdata) {
 		cat_cont.push("<div class='category'>");
 		var list_of_items = [];
@@ -315,6 +315,21 @@ function log_timeEnd() {
 	
 };
 
+function found_it() {
+	console.log("Found")
+	log_timeEnd()
+}
+
+function give_up() {
+	console.log("Gave up")
+	if(mode_array[currentsubject["num"]]) {
+		console.log(currentsubject["name"].concat(" categorized"))
+	}
+	else {
+		console.log(currentsubject["name"].concat(" uncategorized"))
+	};
+}
+
 mode_array = shuffle(mode_array);
 switch_data(mode_array[currentsubject["num"]], currentsubject);
 log_time();
@@ -330,7 +345,6 @@ $(document).on('click', '.subj_nav', function(e){
 		log_time();
 		return
 	};
-	log_timeEnd();
 	currentsubject = subjectlist[$(this)["0"].id];
 	log_time();
 	switch_data(mode_array[currentsubject["num"]], currentsubject);
