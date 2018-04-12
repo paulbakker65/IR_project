@@ -1,3 +1,7 @@
+clc;
+close all;
+clear;
+
 fname = 'results.json'; 
 fid = fopen(fname); 
 raw = fread(fid,inf); 
@@ -53,7 +57,6 @@ hold on  % Keep the Month_O boxplots on figure overlap the Month_S boxplots
 % Boxplot for the simulated temperature from January to December 
 position_S = 1.3:1:8.3;  % Define position for 12 Month_S boxplots  
 box_S = boxplot(time_uncat,'colors','r','positions',position_S,'width',0.18);   
-
 hold off   % Insert texts and labels 
 ylabel('Time (s)') 
 text('Position',[1.1,0],'String','Jaguar') 
@@ -70,20 +73,21 @@ delete(out_O)
 out_S = box_S(end,~isnan(box_S(end,:)));  
 delete(out_S)
 
-
-
 count_found = sum(found_data'=='true');
 count_notfound = sum(found_data'=='false');
 total_found = count_found+count_notfound;
 perc_found = count_found./total_found;
 cat_found = perc_found(1:2:end) ;
 uncat_found = perc_found(2:2:end) ;
-foundcount_data = [cat_found; uncat_found];
+foundcount_data = [cat_found*100; uncat_found*100];
 
 hold on;
 c = categorical(labels');
 figure;
-bar(labels,foundcount_data');
+h = bar(foundcount_data');
+xlabel('Task');
+ylabel('Percentage correct');
+legend(h,{'Categorized','Uncategorized'});
 hold off;
 
 
