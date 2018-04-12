@@ -8,56 +8,56 @@
 
 var jaguar = {
 	name:"Jaguar",
-	task:"Find a retailer for...",
+	task:"Find some games highly regarded to play on the Atari Jaguar game console.",
 	datalink:"./jaguar.json",
 	num:0
 };
 
 var shell = {
 	name:"Shell",
-	task:"What type of...",
+	task:"What do we mean when we say 'on shell particles'?",
 	datalink:"./shell.json",
 	num:1
 };
 
 var hertz = {
 	name:"Hertz",
-	task:"Where is...",
+	task:"What is the gas mileage of a class A car that can be rented at Hertz?",
 	datalink:"./hertz.json",
 	num:2
 };
 
 var apple = {
 		name:"Apple",
-		task:"Where is...",
+		task:"How much does the game 'Apples to Apples' cost?",
 		datalink:"./apple.json",
 		num:3
 	};
 
 var fish = {
 		name:"Fish",
-		task:"Where is...",
+		task:"You are looking for a paper on the detection of eyeshine by flashlight fishes.",
 		datalink:"./fish.json",
 		num:4
 	};
 
 var mouse = {
 		name:"Mouse",
-		task:"Where is...",
+		task:"You are looking for an elementary school report on Mickey Mouse.",
 		datalink:"./mouse.json",
 		num:5
 	};
 
 var bear = {
 		name:"Bear",
-		task:"Where is...",
+		task:"Find the lyrics of the song 'Cherish' by Papa Bear.",
 		datalink:"./bear.json",
 		num:6
 	};
 
 var duck = {
 		name:"Duck",
-		task:"Where is...",
+		task:"Who does the voice of Daffy Duck in 'To Duck... or Not to Duck'?",
 		datalink:"./duck.json",
 		num:7
 	};
@@ -378,18 +378,61 @@ function give_up() {
 	lclicks = 0;
 };
 
+var feedbackform = "\
+<p>Please provide us with a little additional feedback:</p>\
+<br><br>\
+<b>I can find an answer more efficiently by using categorized search results.</b>\
+<br>\
+<b>I fully agree = 7 ; I fully disagree = 1</b>\
+<select name='FB1' id='FB1'></select>\
+<br><br>\
+<b>I prefer browsing through a uncategorized list of search results.</b>\
+<br>\
+<b>I fully agree = 7 ; I fully disagree = 1</b>\
+<select name='FB2' id='FB2'></select>\
+<br><br>\
+<b>I don't like browsing through a list of uncategorized search results.</b>\
+<br>\
+<b>I fully agree = 7 ; I fully disagree = 1</b>\
+<select name='FB3' id='FB3'></select>\
+";
+
+var lickert = "\
+<option value='NaN'>please select</option>\
+<option value='1'>1</option>\
+<option value='2'>2</option>\
+<option value='3'>3</option>\
+<option value='4'>4</option>\
+<option value='5'>5</option>\
+<option value='6'>6</option>\
+<option value='7'>7</option>\
+"
+
 function save() {
 	log_saved = true;
-	console.log(log);
-	console.log(user);
 	var usrstr = JSON.stringify(user);
-	console.log(usrstr);
-	console.log(typeof usrstr);
 	var data = {};
-	data[usrstr]=log;
-	console.log(data);
-	$.post("saveresults.php", {json : JSON.stringify(data)}, function(e){
-		alert(e);
+	$( "<div id='feedback'></div>").appendTo( "body" );
+	$(feedbackform).appendTo("#feedback");
+	$(lickert).appendTo(["#FB1", "#FB2", "#FB3"]);
+	$( function() {
+		$("#feedback").dialog({
+			dialogClass: "no-close",
+			title: "Almost done!",
+			buttons: [
+			{
+				text: "Submit and Save results",
+				click: function() {
+					var feedback = {};
+					feedback.fb1 = $("#FB1")["0"].value;
+					feedback.fb2 = $("#FB2")["0"].value;
+					feedback.fb3 = $("#FB3")["0"].value;
+					data[usrstr]=[log, feedback];
+					$.post("saveresults.php", {json : JSON.stringify(data)}, function(e){alert(e);});
+					$(this).dialog("close");
+				}
+			}]
+		});
 	});
 };
 
