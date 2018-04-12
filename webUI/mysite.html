@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <html>
 <head>
-	<title>Categorized / Uncategorized search results</title>
+	<title>Categorized / Uncategorized</title>
 
 	<link rel="stylesheet" href="jquery-ui.css">
 
@@ -17,12 +17,14 @@
 			fill: #fff;
 			font: 12px sans-serif;
 			height: 1;
+			margin-right: 10px;
 		}
 
 		p {
-			margin: 2px;
-			padding: 3px;
-			}
+			font: 14px sans-serif;
+			color: Tomato;
+			padding-left: 10px;
+		}
 
 		g {
 			height: x200px;
@@ -55,6 +57,9 @@
 		}
 
 		.subj_nav{
+			border-style: solid;
+			border-width: 2px;
+			border-color: white;
 			padding: 10px;
 			font: 14px sans-serif;
 			color: DodgerBlue;			
@@ -62,32 +67,79 @@
 
 		.subject{
 			padding: 10px;
-			padding-bottom: 20px;
 		}
 
 		.category{
 			margin-bottom: 10px;
-			background-color: lightblue;
+			border-style: solid;
+			border-width: 2px;
+		}
+
+		#C0.category{
+			border-color: red;
+		}
+
+		#C1.category{
+			border-color: lightblue;
+		}
+
+		#C2.category{
+			border-color: purple;
+		}
+
+		#C3.category{
+			border-color: green;
+		}
+
+		#C4.category{
+			border-color: blue;
+		}
+
+		.hover{
+			border-color: Tomato;
+		}
+
+		.entry.hover{
+			background-color: lightgrey;
+		}
+
+		aside{
+			float: right;
+			margin: 5px;
+			padding: 5px;
+			padding-top: 15px;
+		}
+
+		button{
+			font: 14px sans-serif;
+			padding-bottom: 5px;
+			margin-bottom: 5px;
+		}
+
+		nav{
+			border-style: solid;
+			border-width: 4px;
+			border-color: lightgrey;
+			margin-bottom: 5px;
+		}
+
+		.no-close .ui-dialog-titlebar-close{
+			display: none;
 		}
 
 	</style>
 </head>
 
 <body>
-	<nav>
-		
-		<div class="navbars">
-			<div class="right-cont">
-			</div>
-			<div class="left-cont">
-			</div>
-		</div>
-	</nav>
+	<aside>
+		<button onclick="found_it()">Found it!</button>
+		<div/>
+		<button onclick="give_up()">Give up</button>
+		<div/>
+		<button onclick="save()">Save</button>
+	</aside>
+	<nav></nav>
 	<article></article>
-	<button onclick="found_it()">Found it!</button>
-	<button onclick="give_up()">Give up</button>
-	<button onclick="save()">Save</button>
-	<output id="list"></output>
 	<script type="text/javascript" src="io.js" charset="utf-8"></script>
 </body>
 </html>

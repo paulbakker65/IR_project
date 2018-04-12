@@ -75,7 +75,9 @@ var currentpage = 1;
 
 var n_pages = 0;
 
-var clicks = 0;
+var lclicks = 0;
+
+var pclicks = 0;
 
 var begin = Date.now()
 
@@ -86,16 +88,18 @@ var not_saved = true;
 var log_saved = false;
 
 var log = [ 
-		{task:"", cat:false, found:false, time:0, clicks:0},
-		{task:"", cat:false, found:false, time:0, clicks:0},
-		{task:"", cat:false, found:false, time:0, clicks:0},
-		{task:"", cat:false, found:false, time:0, clicks:0},
-		{task:"", cat:false, found:false, time:0, clicks:0},
-		{task:"", cat:false, found:false, time:0, clicks:0},
-		{task:"", cat:false, found:false, time:0, clicks:0},
-		{task:"", cat:false, found:false, time:0, clicks:0}
+		{task:"", cat:false, found:false, time:0, lclicks:0, pclicks:0},
+		{task:"", cat:false, found:false, time:0, lclicks:0, pclicks:0},
+		{task:"", cat:false, found:false, time:0, lclicks:0, pclicks:0},
+		{task:"", cat:false, found:false, time:0, lclicks:0, pclicks:0},
+		{task:"", cat:false, found:false, time:0, lclicks:0, pclicks:0},
+		{task:"", cat:false, found:false, time:0, lclicks:0, pclicks:0},
+		{task:"", cat:false, found:false, time:0, lclicks:0, pclicks:0},
+		{task:"", cat:false, found:false, time:0, lclicks:0, pclicks:0}
 		];
 
+var uid = Math.floor((Math.random() * 99999) + 1);
+var user = {age: "0", gender: "NA", uid: uid};
 
 ///////////
 // NAVs ///
@@ -103,6 +107,7 @@ var log = [
 
 function subject_navigation(subject){
 	// create subject navigation
+	$("nav").append("<p>Instruction: Go through all 8 topics hereunder and execute the search challenge. If you found the answer, click the button on the top right. If you can't find it, you can give up. After completing all challenges, please save the results.</p>");
 	subj_items = [];
 	for (var key in subjectlist) {
 		subj_items.push("<span class='subj_nav' id='"+subjectlist[key].name+"'>"+subjectlist[key].name+"</span>");
@@ -113,6 +118,7 @@ function subject_navigation(subject){
 	}).appendTo("nav");
 	// highlight current subject
 	$("#"+subject.name).attr('id', 'currentpage');
+	$("nav").append("<p>Your challenge: "+subject.task+"</p>");
 };
 
 function page_navigation(n_pages, page){
@@ -244,8 +250,10 @@ function load_data_categorised(page, subject, catdata){
 	};
 	//console.log(catdata)
 	//console.log(n_pages);
+	var cn = 0;
 	for (var key in catdata) {
-		cat_cont.push("<div class='category'>");
+		cat_cont.push("<div class='category' id='C"+cn+"'>");
+		cn++;
 		var list_of_items = [];
 		var begin_i = (page-1)*cat_e_pp;
 		var end_i = (page*cat_e_pp);
@@ -326,30 +334,32 @@ function log_timeEnd() {
 	else {
 		console.timeEnd(currentsubject["name"].concat(" uncategorized"));
 	};
-	console.log("Number of clicks: " + clicks)
+	console.log("Number of clicks: " + lclicks)
 	
 	
 };
 
 function found_it() {
 	not_saved = false;
-	console.log("Found")
-	log_timeEnd()
+	console.log("Found");
+	log_timeEnd();
 	
-	var end = Date.now()
+	var end = Date.now();
 	
 	log[currentsubject["num"]].task = currentsubject.name;
 	log[currentsubject["num"]].cat = mode_array[currentsubject["num"]];
 	log[currentsubject["num"]].found = true;
 	log[currentsubject["num"]].time = (end-begin)/1000;
-	log[currentsubject["num"]].clicks = clicks;
+	log[currentsubject["num"]].pclicks = pclicks;
+	log[currentsubject["num"]].lclicks = lclicks;
 	
-	clicks = 0;
+	pclicks = 0;
+	lclicks = 0;
 }
 
 function give_up() {
 	not_saved = false;
-	console.log("Gave up")
+	console.log("Gave up");
 	if(mode_array[currentsubject["num"]]) {
 		console.log(currentsubject["name"].concat(" categorized"))
 	}
@@ -361,18 +371,68 @@ function give_up() {
 	log[currentsubject["num"]].cat = mode_array[currentsubject["num"]];
 	log[currentsubject["num"]].found = false;
 	log[currentsubject["num"]].time = -1;
-	log[currentsubject["num"]].clicks = clicks;
-}
+	log[currentsubject["num"]].pclicks = pclicks;
+	log[currentsubject["num"]].lclicks = lclicks;
 
-mode_array = shuffle(mode_array);
-switch_data(mode_array[currentsubject["num"]], currentsubject);
-begin = Date.now();
-log_time();
+	pclicks = 0;
+	lclicks = 0;
+};
 
 function save() {
 	log_saved = true;
-	console.log(log)
-}
+	console.log(log);
+	console.log(user);
+	var usrstr = JSON.stringify(user);
+	console.log(usrstr);
+	console.log(typeof usrstr);
+	var data = {};
+	data[usrstr]=log;
+	console.log(data);
+	$.post("saveresults.php", {json : JSON.stringify(data)}, function(e){
+		alert(e);
+	});
+};
+
+function basic_info() {
+	$( "<div id='basicinfo'></div>").appendTo( "body" );
+	$("<p>Please insert your age and gender</p>").appendTo("#basicinfo");
+	$( "<form id='userinfo' action='javascript:;' onsubmit='myFunction(this)'></form>").appendTo("#basicinfo");
+	$("#userinfo").append("\
+		<input type='text' placeholder='Age' name='age' id='age'/>\
+		<br><br>\
+		<select name='gender' id='gender'>\
+		<option value='NP'>Gender: please select</option>\
+		<option value='male'>Male</option>\
+		<option value='female'>Female</option>\
+		<option value='other'>Other</option>\
+		</select>");
+	$( function() {
+		$("#basicinfo").dialog({
+			dialogClass: "no-close",
+			title: "Welcome!",
+			buttons: [
+			{
+				text: "Submit",
+				click: function() {
+					user.age = $("#age")["0"].value;
+					user.gender = $("#gender")["0"].value;
+					$(this).dialog("close");
+					console.log(user);
+				}
+			}]
+		}
+			);
+	});
+};
+
+
+
+mode_array = shuffle(mode_array);
+switch_data(mode_array[currentsubject["num"]], currentsubject);
+basic_info();
+begin = Date.now();
+log_time();
+
 
 ////////////
 // EVENTS //
@@ -387,11 +447,27 @@ $(window).on("beforeunload", function() {
 	}
 });
 
+$(document).on('mouseenter', '.subj_nav', function(){
+	$(this).addClass("hover");
+});
+
+$(document).on('mouseleave', '.subj_nav', function(){
+	$(this).removeClass("hover");
+});
+
+$(document).on('mouseenter', '.entry', function(){
+	$(this).addClass("hover");
+});
+
+$(document).on('mouseleave', '.entry', function(){
+	$(this).removeClass("hover");
+});
+
 $(document).on('click', '.subj_nav', function(e){
 	// console.log(e)
 	// console.log($(this))
 	if(not_saved) {
-		alert("Please provide if you have found the information or give up on this particular task");
+		alert("Please provide if you have found the information or given up on this particular task");
 		return
 	}
 	
@@ -408,7 +484,7 @@ $(document).on('click', '.subj_nav', function(e){
 });
 
 $(document).on('click', '.entry', function(e){
-	clicks++; 
+	lclicks++; 
 	window.open($(this)["0"].attributes.href.value)
 });
 
@@ -444,7 +520,8 @@ $(document).on('click', '.pagenav', function(e){
 	};
 	if ($(this)["0"].id.length < 3) {
 		currentpage = Number($(this)["0"].id);
-	};	
+	};
+	pclicks++;
 	get_data(mode_array[currentsubject["num"]], currentsubject, currentpage);
 });
 
